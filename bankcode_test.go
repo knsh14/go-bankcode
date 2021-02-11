@@ -108,3 +108,14 @@ func TestListBranch(t *testing.T) {
 		t.Fatal(diff)
 	}
 }
+func TestVersion(t *testing.T) {
+	t.Parallel()
+	client := NewClient()
+	version, err := client.GetVersion(context.Background(), "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if version == "" {
+		t.Fatal("version response is empty")
+	}
+}
