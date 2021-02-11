@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/url"
-	"strconv"
 )
-
 
 type Bank struct {
 	Code          string `json:"code"`
@@ -32,13 +30,15 @@ type Banks struct {
 func (c *Client) GetBank(ctx context.Context, code string, param *GetParameter) (*Bank, error) {
 	p, err := url.Parse(c.base.String() + "/banks/" + code)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("generate URL: %w", err)
 	}
-	query := p.Query()
-	p.RawQuery = query.Encode()
+	req, err := c.getRequest(ctx, p, param)
+	if err != nil {
+		return nil, fmt.Errorf("generate request: %w", err)
+	}
 
 	var res Bank
-	err = c.call(ctx, p, func(resp io.ReadCloser) error {
+	err = c.call(ctx, req, func(resp io.ReadCloser) error {
 		if err := json.NewDecoder(resp).Decode(&res); err != nil {
 			return fmt.Errorf("decode to response: %w", err)
 		}
@@ -56,11 +56,13 @@ func (c *Client) ListBanks(ctx context.Context, param *ListParameter) (*Banks, e
 	if err != nil {
 		return nil, err
 	}
-	query := p.Query()
-	query.Add("limit", strconv.Itoa(param.Limit))
-	p.RawQuery = query.Encode()
+	req, err := c.listRequest(ctx, p, param)
+	if err != nil {
+		return nil, fmt.Errorf("generate request: %w", err)
+	}
+
 	var res Banks
-	err = c.call(ctx, p, func(resp io.ReadCloser) error {
+	err = c.call(ctx, req, func(resp io.ReadCloser) error {
 		if err := json.NewDecoder(resp).Decode(&res); err != nil {
 			return fmt.Errorf("decode to response: %w", err)
 		}

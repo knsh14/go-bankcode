@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/url"
-	"strconv"
 )
 
 type Branch struct {
@@ -33,11 +32,13 @@ func (c *Client) GetBranch(ctx context.Context, bankCode, branchCode string, par
 	if err != nil {
 		return nil, err
 	}
-	query := p.Query()
-	p.RawQuery = query.Encode()
+	req, err := c.getRequest(ctx, p, param)
+	if err != nil {
+		return nil, fmt.Errorf("generate request: %w", err)
+	}
 
 	var res []*Branch
-	err = c.call(ctx, p, func(resp io.ReadCloser) error {
+	err = c.call(ctx, req, func(resp io.ReadCloser) error {
 		if err := json.NewDecoder(resp).Decode(&res); err != nil {
 			return fmt.Errorf("decode to response: %w", err)
 		}
@@ -55,12 +56,13 @@ func (c *Client) ListBranch(ctx context.Context, bankCode string, param *ListPar
 	if err != nil {
 		return nil, err
 	}
-	query := p.Query()
-	query.Add("limit", strconv.Itoa(param.Limit))
-	p.RawQuery = query.Encode()
+	req, err := c.listRequest(ctx, p, param)
+	if err != nil {
+		return nil, fmt.Errorf("generate request: %w", err)
+	}
 
 	var res Branches
-	err = c.call(ctx, p, func(resp io.ReadCloser) error {
+	err = c.call(ctx, req, func(resp io.ReadCloser) error {
 		if err := json.NewDecoder(resp).Decode(&res); err != nil {
 			return fmt.Errorf("decode to response: %w", err)
 		}

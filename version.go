@@ -13,10 +13,11 @@ func (c *Client) GetVersion(ctx context.Context, apiKey string) (string, error) 
 	if err != nil {
 		return "", err
 	}
+	req, err := c.getRequest(ctx, p, &GetParameter{APIKey: apiKey})
 	var res struct {
 		Version string `json:"version"`
 	}
-	err = c.call(ctx, p, func(resp io.ReadCloser) error {
+	err = c.call(ctx, req, func(resp io.ReadCloser) error {
 		if err := json.NewDecoder(resp).Decode(&res); err != nil {
 			return fmt.Errorf("decode to response: %w", err)
 		}
