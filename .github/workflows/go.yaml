@@ -32,10 +32,8 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - name: Test Go Code
-        run: go test -v -race -covermode=atomic -coverprofile=coverage.txt ./...
+        run: BANKCODE_API_KEY=${BANKCODE_API_KEY} go test -v -race -covermode=atomic -coverprofile=coverage.txt ./...
         env:
-          BANKCODE_API_KEY: ${{ secrets.BANKCODE_API_KEY }}
-        with:
           BANKCODE_API_KEY: ${{ secrets.BANKCODE_API_KEY }}
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
