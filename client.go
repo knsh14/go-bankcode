@@ -62,3 +62,16 @@ func (c *Client) call(ctx context.Context, u *url.URL, f func(resp io.ReadCloser
 
 	return f(resp.Body)
 }
+
+type GetParameter struct {
+	APIKey string
+	Fields []string
+}
+
+type ListParameter struct {
+	APIKey string
+	Filter string
+	Limit  int
+	Cursor string
+	Fields []string
+}

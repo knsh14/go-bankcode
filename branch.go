@@ -9,8 +9,7 @@ import (
 	"strconv"
 )
 
-
-type Bank struct {
+type Branch struct {
 	Code          string `json:"code"`
 	Name          string `json:"name"`
 	HalfWidthKana string `json:"halfWidthKana"`
@@ -18,26 +17,26 @@ type Bank struct {
 	Hiragana      string `json:"hiragana"`
 }
 
-type Banks struct {
-	Data       []*Bank `json:"data"`
-	Size       int     `json:"size"`
-	Limit      int     `json:"limit"`
-	HasNext    bool    `json:"hasNext"`
-	NextCursor string  `json:"nextCursor"`
-	HasPrev    bool    `json:"hasPrev"`
-	PrevCursor string  `json:"prevCursor"`
-	Version    string  `json:"version"`
+type Branches struct {
+	Data       []*Branch `json:"data"`
+	Size       int       `json:"size"`
+	Limit      int       `json:"limit"`
+	HasNext    bool      `json:"hasNext"`
+	NextCursor string    `json:"nextCursor"`
+	HasPrev    bool      `json:"hasPrev"`
+	PrevCursor string    `json:"prevCursor"`
+	Version    string    `json:"version"`
 }
 
-func (c *Client) GetBank(ctx context.Context, code string, param *GetParameter) (*Bank, error) {
-	p, err := url.Parse(c.base.String() + "/banks/" + code)
+func (c *Client) GetBranch(ctx context.Context, bankCode, branchCode string, param *GetParameter) ([]*Branch, error) {
+	p, err := url.Parse(c.base.String() + "/banks/" + bankCode + "/branches/" + branchCode)
 	if err != nil {
 		return nil, err
 	}
 	query := p.Query()
 	p.RawQuery = query.Encode()
 
-	var res Bank
+	var res []*Branch
 	err = c.call(ctx, p, func(resp io.ReadCloser) error {
 		if err := json.NewDecoder(resp).Decode(&res); err != nil {
 			return fmt.Errorf("decode to response: %w", err)
@@ -48,18 +47,19 @@ func (c *Client) GetBank(ctx context.Context, code string, param *GetParameter) 
 		return nil, err
 	}
 
-	return &res, nil
+	return res, nil
 }
 
-func (c *Client) ListBanks(ctx context.Context, param *ListParameter) (*Banks, error) {
-	p, err := url.Parse(c.base.String() + "/banks")
+func (c *Client) ListBranch(ctx context.Context, bankCode string, param *ListParameter) (*Branches, error) {
+	p, err := url.Parse(c.base.String() + "/banks/" + bankCode + "/branches")
 	if err != nil {
 		return nil, err
 	}
 	query := p.Query()
 	query.Add("limit", strconv.Itoa(param.Limit))
 	p.RawQuery = query.Encode()
-	var res Banks
+
+	var res Branches
 	err = c.call(ctx, p, func(resp io.ReadCloser) error {
 		if err := json.NewDecoder(resp).Decode(&res); err != nil {
 			return fmt.Errorf("decode to response: %w", err)
@@ -69,5 +69,6 @@ func (c *Client) ListBanks(ctx context.Context, param *ListParameter) (*Banks, e
 	if err != nil {
 		return nil, err
 	}
+
 	return &res, nil
 }
