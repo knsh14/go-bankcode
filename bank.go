@@ -28,11 +28,11 @@ type Banks struct {
 }
 
 func (c *Client) GetBank(ctx context.Context, code string, param *GetParameter) (*Bank, error) {
-	p, err := url.Parse(c.base.String() + "/banks/" + code)
+	u, err := url.Parse(c.base.String() + "/banks/" + code)
 	if err != nil {
 		return nil, fmt.Errorf("generate URL: %w", err)
 	}
-	req, err := c.getRequest(ctx, p, param)
+	req, err := c.getRequest(ctx, u, param)
 	if err != nil {
 		return nil, fmt.Errorf("generate request: %w", err)
 	}
@@ -47,16 +47,15 @@ func (c *Client) GetBank(ctx context.Context, code string, param *GetParameter) 
 	if err != nil {
 		return nil, err
 	}
-
 	return &res, nil
 }
 
 func (c *Client) ListBanks(ctx context.Context, param *ListParameter) (*Banks, error) {
-	p, err := url.Parse(c.base.String() + "/banks")
+	u, err := url.Parse(c.base.String() + "/banks")
 	if err != nil {
 		return nil, err
 	}
-	req, err := c.listRequest(ctx, p, param)
+	req, err := c.listRequest(ctx, u, param)
 	if err != nil {
 		return nil, fmt.Errorf("generate request: %w", err)
 	}

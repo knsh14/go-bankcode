@@ -9,11 +9,15 @@ import (
 )
 
 func (c *Client) GetVersion(ctx context.Context, apiKey string) (string, error) {
-	p, err := url.Parse(c.base.String() + "/version")
+	u, err := url.Parse(c.base.String() + "/version")
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("generate URL: %w", err)
 	}
-	req, err := c.getRequest(ctx, p, &GetParameter{APIKey: apiKey})
+	req, err := c.getRequest(ctx, u, &GetParameter{APIKey: apiKey})
+	if err != nil {
+		return "", fmt.Errorf("generate request: %w", err)
+	}
+
 	var res struct {
 		Version string `json:"version"`
 	}

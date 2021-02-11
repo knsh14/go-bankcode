@@ -28,11 +28,11 @@ type Branches struct {
 }
 
 func (c *Client) GetBranch(ctx context.Context, bankCode, branchCode string, param *GetParameter) ([]*Branch, error) {
-	p, err := url.Parse(c.base.String() + "/banks/" + bankCode + "/branches/" + branchCode)
+	u, err := url.Parse(c.base.String() + "/banks/" + bankCode + "/branches/" + branchCode)
 	if err != nil {
 		return nil, err
 	}
-	req, err := c.getRequest(ctx, p, param)
+	req, err := c.getRequest(ctx, u, param)
 	if err != nil {
 		return nil, fmt.Errorf("generate request: %w", err)
 	}
@@ -47,16 +47,15 @@ func (c *Client) GetBranch(ctx context.Context, bankCode, branchCode string, par
 	if err != nil {
 		return nil, err
 	}
-
 	return res, nil
 }
 
 func (c *Client) ListBranch(ctx context.Context, bankCode string, param *ListParameter) (*Branches, error) {
-	p, err := url.Parse(c.base.String() + "/banks/" + bankCode + "/branches")
+	u, err := url.Parse(c.base.String() + "/banks/" + bankCode + "/branches")
 	if err != nil {
 		return nil, err
 	}
-	req, err := c.listRequest(ctx, p, param)
+	req, err := c.listRequest(ctx, u, param)
 	if err != nil {
 		return nil, fmt.Errorf("generate request: %w", err)
 	}
@@ -71,6 +70,5 @@ func (c *Client) ListBranch(ctx context.Context, bankCode string, param *ListPar
 	if err != nil {
 		return nil, err
 	}
-
 	return &res, nil
 }

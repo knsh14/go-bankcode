@@ -50,27 +50,33 @@ type Client struct {
 	base               *url.URL
 }
 
-func (c *Client) call(ctx context.Context, req *http.Request, f func(resp io.ReadCloser) error) error {
+func (c *Client) call(ctx context.Context, req *http.Request, f func(resp io.ReadCloser) error) (err error) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("request to bank code: %w", err)
 	}
 	defer func() {
 		defer resp.Body.Close()
-		io.Copy(ioutil.Discard, resp.Body)
+		if _, dErr := io.Copy(ioutil.Discard, resp.Body); dErr != nil {
+			err = dErr
+		}
 	}()
 
 	if resp.StatusCode != 200 {
-		return fmt.Errorf("http status error: %s", resp.Status)
+		return fmt.Errorf("invalid http status: %s", resp.Status)
 	}
 
 	return f(resp.Body)
 }
 
 func (c *Client) getRequest(ctx context.Context, u *url.URL, param *GetParameter) (*http.Request, error) {
+	apiKey := c.apiKey
+	if param.APIKey != "" {
+		apiKey = param.APIKey
+	}
 	query := u.Query()
-	if !c.keyToRequestHeader && param.APIKey != "" {
-		query.Add("apikey", param.APIKey)
+	if !c.keyToRequestHeader && apiKey != "" {
+		query.Add("apikey", apiKey)
 	}
 	if len(param.Fields) > 0 {
 		query.Add("fields", strings.Join(param.Fields, ","))
@@ -80,16 +86,20 @@ func (c *Client) getRequest(ctx context.Context, u *url.URL, param *GetParameter
 	if err != nil {
 		return nil, fmt.Errorf("generate http request: %w", err)
 	}
-	if c.keyToRequestHeader && param.APIKey != "" {
-		req.Header.Add("apikey", param.APIKey)
+	if c.keyToRequestHeader && apiKey != "" {
+		req.Header.Add("apikey", apiKey)
 	}
 	return req, nil
 }
 
 func (c *Client) listRequest(ctx context.Context, u *url.URL, param *ListParameter) (*http.Request, error) {
+	apiKey := c.apiKey
+	if param.APIKey != "" {
+		apiKey = param.APIKey
+	}
 	query := u.Query()
-	if !c.keyToRequestHeader && param.APIKey != "" {
-		query.Add("apikey", param.APIKey)
+	if !c.keyToRequestHeader && apiKey != "" {
+		query.Add("apikey", apiKey)
 	}
 	if param.Filter != "" {
 		query.Add("filter", param.Filter)
@@ -108,8 +118,8 @@ func (c *Client) listRequest(ctx context.Context, u *url.URL, param *ListParamet
 	if err != nil {
 		return nil, fmt.Errorf("generate http request: %w", err)
 	}
-	if c.keyToRequestHeader && param.APIKey != "" {
-		req.Header.Add("apikey", param.APIKey)
+	if c.keyToRequestHeader && apiKey != "" {
+		req.Header.Add("apikey", apiKey)
 	}
 	return req, nil
 }
