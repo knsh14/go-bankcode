@@ -49,8 +49,8 @@ type Client struct {
 }
 
 func NewClient(options ...option) (*Client, error) {
-	n := rate.Every(time.Second)
-	l := rate.NewLimiter(n, 3)
+	n := rate.Every(3 * time.Second)
+	l := rate.NewLimiter(n, 1)
 	c := &Client{
 		base:        endpoint,
 		httpClient:  http.DefaultClient,
