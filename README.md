@@ -2,6 +2,7 @@ go-bankcode
 ---
 
 ![CI](https://github.com/knsh14/go-bankcode/workflows/CI/badge.svg)
+[![Go Reference](https://pkg.go.dev/badge/github.com/knsh14/go-bankcode.svg)](https://pkg.go.dev/github.com/knsh14/go-bankcode)
 
 # About
 unofficial [bankcode API]( https://bankcode-jp.com/ ) client for Go

@@ -10,12 +10,23 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
+
+	"golang.org/x/time/rate"
 )
 
 const baseURL = "https://apis.bankcode-jp.com/v1"
 
 var (
 	endpoint *url.URL
+)
+
+type Plan string
+
+const (
+	PlanFree     = "free"
+	PlanStandard = "standard"
+	PlanPro      = "pro"
 )
 
 func init() {
@@ -28,10 +39,22 @@ func init() {
 
 type option func(*Client) error
 
+// Client provides access method to BankCode API
+type Client struct {
+	keyToRequestHeader bool
+	apiKey             string
+	httpClient         *http.Client
+	base               *url.URL
+	ratelimiter        *rate.Limiter
+}
+
 func NewClient(options ...option) (*Client, error) {
+	n := rate.Every(time.Second)
+	l := rate.NewLimiter(n, 3)
 	c := &Client{
-		base:       endpoint,
-		httpClient: http.DefaultClient,
+		base:        endpoint,
+		httpClient:  http.DefaultClient,
+		ratelimiter: l,
 	}
 
 	for _, o := range options {
@@ -42,15 +65,11 @@ func NewClient(options ...option) (*Client, error) {
 	return c, nil
 }
 
-// Client provides access method to BankCode API
-type Client struct {
-	keyToRequestHeader bool
-	apiKey             string
-	httpClient         *http.Client
-	base               *url.URL
-}
-
 func (c *Client) call(ctx context.Context, req *http.Request, f func(resp io.ReadCloser) error) (err error) {
+
+	if err := c.ratelimiter.Wait(ctx); err != nil {
+		return err
+	}
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("request to bank code: %w", err)
@@ -165,5 +184,20 @@ func WithHeaderAPIKey(b bool) option {
 	return func(c *Client) error {
 		c.keyToRequestHeader = b
 		return nil
+	}
+}
+
+func WithPlan(p Plan) option {
+	return func(c *Client) error {
+		switch p {
+		case PlanFree:
+			return nil
+		case PlanStandard, PlanPro:
+			l := rate.NewLimiter(rate.Inf, 1)
+			c.ratelimiter = l
+			return nil
+		default:
+			return fmt.Errorf("unknown plan %s", p)
+		}
 	}
 }
