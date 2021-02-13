@@ -3,20 +3,29 @@ package bankcode
 import (
 	"context"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 )
 
+var (
+	once   sync.Once
+	client *Client
+)
+
 func testClient(t *testing.T) *Client {
 	t.Helper()
-	apiKey := os.Getenv("BANKCODE_API_KEY")
-	c, err := NewClient(WithAPIKey(apiKey))
-	if err != nil {
-		t.Fatal(err)
-	}
-	return c
+	once.Do(func() {
+		apiKey := os.Getenv("BANKCODE_API_KEY")
+		c, err := NewClient(WithAPIKey(apiKey))
+		if err != nil {
+			t.Fatal(err)
+		}
+		client = c
+	})
+	return client
 }
 
 func TestListBanks(t *testing.T) {
@@ -256,7 +265,7 @@ func TestListParameter_Banks(t *testing.T) {
 				Size:       1,
 				Limit:      1,
 				HasNext:    true,
-				NextCursor: "nob4gqVAoYiC4vLAuyWZuA70I-m_Gn96eQd4N6hveLc",
+				NextCursor: "Bywuqh4xObbdbN7QDbzJgZYvqX1fMZhSIOaj5ikK3LQ",
 			},
 		},
 		{
@@ -277,7 +286,7 @@ func TestListParameter_Banks(t *testing.T) {
 				Size:       1,
 				Limit:      1,
 				HasNext:    true,
-				NextCursor: "nob4gqVAoYiC4vLAuyWZuA70I-m_Gn96eQd4N6hveLc",
+				NextCursor: "Bywuqh4xObbdbN7QDbzJgZYvqX1fMZhSIOaj5ikK3LQ",
 			},
 		},
 		{
@@ -296,14 +305,14 @@ func TestListParameter_Banks(t *testing.T) {
 				Size:       1,
 				Limit:      1,
 				HasNext:    true,
-				NextCursor: "nob4gqVAoYiC4vLAuyWZuA70I-m_Gn96eQd4N6hveLc",
+				NextCursor: "Bywuqh4xObbdbN7QDbzJgZYvqX1fMZhSIOaj5ikK3LQ",
 			},
 		},
 		{
 			title: "cursor",
 			input: &ListParameter{
 				Limit:  1,
-				Cursor: "nob4gqVAoYiC4vLAuyWZuA70I-m_Gn96eQd4N6hveLc",
+				Cursor: "Bywuqh4xObbdbN7QDbzJgZYvqX1fMZhSIOaj5ikK3LQ",
 			},
 			expect: &Banks{
 				Data: []*Bank{
@@ -318,7 +327,7 @@ func TestListParameter_Banks(t *testing.T) {
 				Size:       1,
 				Limit:      1,
 				HasNext:    true,
-				NextCursor: "GqahEPgLJcmJvi0n-ogqc8WmBgJaWA-WiZ7aDkl5MuQgFmdp2aO_ak6yQhTQ_kjg",
+				NextCursor: "B_niCQ_R7UW-HJ6ea2iGvDMQz1jxja21PjJ00xMSH2dJFJqHznaxgzWe2YBDyYRU",
 				HasPrev:    true,
 				PrevCursor: "w_JTggxW8eHCK9fMFbcwyA",
 			},
