@@ -8,6 +8,7 @@ import (
 	"net/url"
 )
 
+// GetVersion returns version of bankcode API
 func (c *Client) GetVersion(ctx context.Context, apiKey string) (string, error) {
 	u, err := url.Parse(c.base.String() + "/version")
 	if err != nil {

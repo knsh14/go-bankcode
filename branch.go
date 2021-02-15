@@ -8,6 +8,8 @@ import (
 	"net/url"
 )
 
+// Branch is branch of the bank.
+// Code is not bank code. it is branch code
 type Branch struct {
 	Code          string `json:"code"`
 	Name          string `json:"name"`
@@ -16,6 +18,7 @@ type Branch struct {
 	Hiragana      string `json:"hiragana"`
 }
 
+// Branches is result of ListBranch API
 type Branches struct {
 	Data       []*Branch `json:"data"`
 	Size       int       `json:"size"`
@@ -27,6 +30,7 @@ type Branches struct {
 	Version    string    `json:"version"`
 }
 
+// GetBranch returns branch of the bank. need bank code and branch code
 func (c *Client) GetBranch(ctx context.Context, bankCode, branchCode string, param *GetParameter) ([]*Branch, error) {
 	u, err := url.Parse(c.base.String() + "/banks/" + bankCode + "/branches/" + branchCode)
 	if err != nil {
@@ -50,6 +54,7 @@ func (c *Client) GetBranch(ctx context.Context, bankCode, branchCode string, par
 	return res, nil
 }
 
+// ListBranch returns branches of the bank. need bank code so use ListBank or GetBank to get bank code.
 func (c *Client) ListBranch(ctx context.Context, bankCode string, param *ListParameter) (*Branches, error) {
 	u, err := url.Parse(c.base.String() + "/banks/" + bankCode + "/branches")
 	if err != nil {

@@ -8,6 +8,7 @@ import (
 	"net/url"
 )
 
+// Bank describes bank information
 type Bank struct {
 	Code          string `json:"code"`
 	Name          string `json:"name"`
@@ -16,6 +17,7 @@ type Bank struct {
 	Hiragana      string `json:"hiragana"`
 }
 
+// Banks is result of ListBanks API
 type Banks struct {
 	Data       []*Bank `json:"data"`
 	Size       int     `json:"size"`
@@ -27,6 +29,7 @@ type Banks struct {
 	Version    string  `json:"version"`
 }
 
+// GetBan returns bank info of input bank code
 func (c *Client) GetBank(ctx context.Context, code string, param *GetParameter) (*Bank, error) {
 	u, err := url.Parse(c.base.String() + "/banks/" + code)
 	if err != nil {
@@ -50,6 +53,7 @@ func (c *Client) GetBank(ctx context.Context, code string, param *GetParameter) 
 	return &res, nil
 }
 
+// ListBanks returns list of banks and cursor information
 func (c *Client) ListBanks(ctx context.Context, param *ListParameter) (*Banks, error) {
 	u, err := url.Parse(c.base.String() + "/banks")
 	if err != nil {

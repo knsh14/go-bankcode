@@ -48,6 +48,7 @@ type Client struct {
 	ratelimiter        *rate.Limiter
 }
 
+// NewClient returns Client for bankcode API
 func NewClient(options ...option) (*Client, error) {
 	n := rate.Every(3 * time.Second)
 	l := rate.NewLimiter(n, 1)
@@ -143,11 +144,13 @@ func (c *Client) listRequest(ctx context.Context, u *url.URL, param *ListParamet
 	return req, nil
 }
 
+// GetParameter can use Bank or Branch
 type GetParameter struct {
 	APIKey string
 	Fields []string
 }
 
+// ListParamter is for ListBank API or ListBranch API
 type ListParameter struct {
 	APIKey string
 	Filter string
@@ -156,6 +159,8 @@ type ListParameter struct {
 	Fields []string
 }
 
+// WithAPIKey can set api key for client.
+// you can use bankcode API without API key, but it might be banned if you send too many request
 func WithAPIKey(key string) option {
 	return func(c *Client) error {
 		if key == "" {
@@ -166,6 +171,7 @@ func WithAPIKey(key string) option {
 	}
 }
 
+// WithEndpoint can change endpoint of bankcode API
 func WithEndpoint(endpoint string) option {
 	return func(c *Client) error {
 		if endpoint == "" {
@@ -180,6 +186,8 @@ func WithEndpoint(endpoint string) option {
 	}
 }
 
+// WithHeaderAPIKey can change the field to set APIKey
+// default is query but you can set it to request header.
 func WithHeaderAPIKey(b bool) option {
 	return func(c *Client) error {
 		c.keyToRequestHeader = b
@@ -187,6 +195,8 @@ func WithHeaderAPIKey(b bool) option {
 	}
 }
 
+// WithPlan can change RPS of client.
+// because rps of free plan is limited to 0.3rps
 func WithPlan(p Plan) option {
 	return func(c *Client) error {
 		switch p {
